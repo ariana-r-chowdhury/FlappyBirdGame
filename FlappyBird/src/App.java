@@ -14,7 +14,7 @@ public class App {
         //JFrames are used to create windows that can hold various components like 
         //buttons, labels, text fields, and more. They provide the basic structure and 
         //functionality for a window, including title bars, borders, and resizing capabilities.
-        // Flappy Bird is the title of the window
+        //Flappy Bird is the title of the window
 
 
         //frame.setVisible(true); //makes the frame visible
@@ -29,6 +29,7 @@ public class App {
         FlappyBird flappyBird = new FlappyBird(); //adding an instance of flappybird
         frame.add(flappyBird); //adds flappy bird to frame
         frame.pack(); // so that the bar on top does not count when measuring the size
+        flappyBird.requestFocus(); //flappybird receives inputs from user
         frame.setVisible(true); // generally you'd want your window to be visible after you've added all the settings
 
         //only after we've added the JPanel to the our frame we will set the visibility
