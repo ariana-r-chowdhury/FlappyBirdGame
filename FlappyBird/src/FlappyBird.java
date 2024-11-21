@@ -1,7 +1,7 @@
 import java.awt.*; 
 import java.awt.event.*;
-import java.util.ArrayList; // so this is going to store all the pipes in our game
-import java.util.Random; // so this is going to be used for placing our pipes at random places
+import java.util.ArrayList; // this is going to store all the pipes in our game
+import java.util.Random; // this is going to be used for placing our pipes at random places
 import javax.swing.*;
 
 // FloppyBird class inherits JPanel
@@ -9,14 +9,11 @@ import javax.swing.*;
 // This way we can keep JPanel features and add variales and functions needed for our flappybird game
 
 public class FlappyBird extends JPanel implements ActionListener, KeyListener{
-    //ActionListener for repeating smth multiple times
-    //KeyListener so that prssing space can make bird jump
-
 
     int boardWidth = 360;
     int boardHeight = 640;
-    // IMAGES : adding bg
-
+    
+    // IMAGES
     // The four following variables are going to store our image objects
     Image backgroundImg;
     Image birdImg;
@@ -41,9 +38,33 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
         Bird(Image img) // define the constructor for the image
         {
             this.img = img;
-            //used to differentiate between the instance variable and other variables with the same name
         }
     }
+
+    //Pipes
+    int pipeX = boardWidth;
+    int pipeY = 0;
+    int pipeWidth = 64;
+    int pipeHeight = 512;
+
+    class Pipe 
+    {
+        int x = pipeX;
+        int y = pipeY;
+        int width = pipeWidth;
+        int height = pipeHeight;
+        Image img;
+        boolean passed = false; // to see whether flappybird passed the pipes
+
+        Pipe(Image img)
+        {
+            this.img = img;
+        }
+
+    }
+
+
+
     //game logic
 
     //here we are using the Bird class as a blueprint for "bird"
@@ -56,7 +77,12 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
     //gravity is added so that the bird doesn't keep going upward forever
     //every frame the bird is going to slow down 1 pixel
 
+    int velocitx = -4; // for the pipes
+
+    ArrayList<Pipe> pipes;
+
     Timer gameLoop; //the timer class lets me run a piece of code repeatedly at certain intervals
+    Timer placePipesTimer;
 
     FlappyBird()
     {
@@ -68,18 +94,36 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
 
         //load images
         backgroundImg = new ImageIcon(getClass().getResource("./flappybirdbg.png")).getImage();
-        //get class referrs to the flappybird class and get resource referrs to it's location get Image cuz the variable is image variable
         birdImg = new ImageIcon(getClass().getResource("./flappybird.png")).getImage();
         topPipeImg = new ImageIcon(getClass().getResource("./toppipe.png")).getImage();
         bottomPipeImg = new ImageIcon(getClass().getResource("./bottompipe.png")).getImage();
 
         bird = new Bird(birdImg);
+        pipes = new ArrayList<Pipe>(); //now we have an arraylist of pipes and now we add a new pipe every 1.5s
+
+        //place pipes timer : calls "placePipes" every 1500 milisecons
+        placePipesTimer = new Timer(1500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                placePipes();
+            }
+        });
+        placePipesTimer.start();
 
         //game timer
         gameLoop = new Timer(1000/60, this);
         gameLoop.start(); // starts the timer
 
     }
+
+    public void placePipes()
+    {
+        Pipe topPipe = new Pipe(topPipeImg);
+        pipes.add(topPipe);
+    }
+
+    //get class referrs to the flappybird class and get resource referrs to it's location get Image cuz the variable is image variable
 
     //this is a function of the JPanel
     public void paintComponent(Graphics g)
@@ -93,26 +137,42 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
     {
         //background
         g.drawImage(backgroundImg, 0, 0, boardWidth, boardHeight, null);
-        // we've now created a window and the bg img 
+
+        //bird
+        g.drawImage(bird.img, bird.x, bird.y, bird.width, bird.height, null);
+
+        //pipes
+        for (int i = 0; i < pipes.size(); i++)
+        {
+            Pipe pipe = pipes.get(i);
+            g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
+        }
+
+    }
+    
+    // we've now created a window and the bg img 
         // top left corner of the window is (0,0) and bottom right is (360,640)
         // by calling draw image we passed in the x,y and the width and height
         // when we're drawing we always start from the top right corner (b'_')b
 
-
-        //bird
-        g.drawImage(bird.img, bird.x, bird.y, bird.width, bird.height, null); 
-        // we've now added the bird but we need to make it move for which we gotta make a game loop
+    // we've now added the bird but we need to make it move for which we gotta make a game loop
         // the paint component function only calls the draw method once
         // to make a loop we've gotta make a function that does it over and over again (per frame) (60fps)
 
-    }
 
     public void move()
     {
-        // updates all the x and y position of the object
-        velocityY += gravity; //update the velocity with the gravity
+        //bird                                                                        
+        velocityY += gravity;                                                    //update the velocity with the gravity// updates all the x and y position of the object
         bird.y += velocityY;
         bird.y = Math.max(bird.y, 0);
+
+        //pipe
+        for (int i = 0; i < pipes.size(); i++)
+        {
+            Pipe pipe = pipes.get(i);
+            pipe.x += velocitx; // every frame pipes will move -4 to the left
+        }
     }
 
     @Override //this is going to be the action performed 60 times every second
@@ -120,15 +180,13 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
         move();
         repaint(); //this will call paintcomponent
     }
-
-    @Override
-
     //key prssed-> for all keys
+    //if the key pressed is the space bar key its gonna do a velocity check and go up (cuz v is -9 here)
+    @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE)
         {
             velocityY = -9;
-            //if the key pressed is the space bar key its gonna do a velocity check and go up (cuz v is -9 here)
         }
     }
 

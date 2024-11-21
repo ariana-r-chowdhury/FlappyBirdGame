@@ -9,16 +9,6 @@ public class App {
 
         JFrame frame = new JFrame("Flappy Bird");
 
-        //JFrame is a top-level window container that provides the basic functionality 
-        //for creating a GUI
-        //JFrames are used to create windows that can hold various components like 
-        //buttons, labels, text fields, and more. They provide the basic structure and 
-        //functionality for a window, including title bars, borders, and resizing capabilities.
-        //Flappy Bird is the title of the window
-
-
-        //frame.setVisible(true); //makes the frame visible
-
         frame.setSize(boardWidth, boardHeight); //to set the size
 
         frame.setLocationRelativeTo(null); //places the window at the center of the screen
@@ -32,11 +22,15 @@ public class App {
         flappyBird.requestFocus(); //flappybird receives inputs from user
         frame.setVisible(true); // generally you'd want your window to be visible after you've added all the settings
 
-        //only after we've added the JPanel to the our frame we will set the visibility
-
-
     }
 }
 
 // next we're gonna make a J Panel which we will use for our canvas
 // With a J Panel we can draw our game
+
+//JFrame is a top-level window container that provides the basic functionality 
+        //for creating a GUI
+        //JFrames are used to create windows that can hold various components like 
+        //buttons, labels, text fields, and more. They provide the basic structure and 
+        //functionality for a window, including title bars, borders, and resizing capabilities.
+        //Flappy Bird is the title of the window
