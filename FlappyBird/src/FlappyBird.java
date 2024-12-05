@@ -80,9 +80,14 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
     int velocitx = -4; // for the pipes
 
     ArrayList<Pipe> pipes;
+    Random random = new Random();
 
     Timer gameLoop; //the timer class lets me run a piece of code repeatedly at certain intervals
     Timer placePipesTimer;
+    
+    boolean gameOver = false;
+
+    double score = 0;
 
     FlappyBird()
     {
@@ -119,8 +124,19 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
 
     public void placePipes()
     {
+        //(0-1) * (pipeHeight/2) -> (0,256)
+        //128
+        //0-128-(0,256) --> pipeHeight/4 -> 3/4 of piprHeight
+        int randomPipeY = (int) (pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2));
+        int openingSpace = boardHeight/4;
+        
         Pipe topPipe = new Pipe(topPipeImg);
+        topPipe.y = randomPipeY;
         pipes.add(topPipe);
+
+        Pipe bottomPipe = new Pipe(bottomPipeImg);
+        bottomPipe.y = topPipe.y + pipeHeight + openingSpace;
+        pipes.add(bottomPipe);
     }
 
     //get class referrs to the flappybird class and get resource referrs to it's location get Image cuz the variable is image variable
@@ -148,6 +164,18 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
             g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
         }
 
+        //score
+        g.setColor(Color.white);
+        g.setFont(new Font("Arial", Font.PLAIN, 32));
+        if (gameOver)
+        {
+            g.drawString("Game Over: " + String.valueOf((int)score), 10, 35);
+        }
+        else
+        {
+            g.drawString(String.valueOf((int) score), 10, 35);
+        }
+
     }
     
     // we've now created a window and the bg img 
@@ -163,22 +191,52 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
     public void move()
     {
         //bird                                                                        
-        velocityY += gravity;                                                    //update the velocity with the gravity// updates all the x and y position of the object
+        velocityY += gravity;     //update the velocity with the gravity// updates all the x and y position of the object
         bird.y += velocityY;
         bird.y = Math.max(bird.y, 0);
 
-        //pipe
+        //pipes
         for (int i = 0; i < pipes.size(); i++)
         {
             Pipe pipe = pipes.get(i);
             pipe.x += velocitx; // every frame pipes will move -4 to the left
+
+            if (!pipe.passed && bird.x > pipe.x + pipe.width)
+            {
+                pipe.passed = true;
+                score += 0.5;
+            }
+
+            if (collision(bird, pipe))
+            {
+                gameOver = true;
+            };
         }
+
+        if (bird.y > boardHeight)
+        {
+            gameOver = true;
+        }
+    }
+
+    public boolean collision(Bird a, Pipe b)
+    {
+        return a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height >b.y;
     }
 
     @Override //this is going to be the action performed 60 times every second
     public void actionPerformed(ActionEvent e) {
         move();
         repaint(); //this will call paintcomponent
+
+        if (gameOver)
+        {
+            placePipesTimer.stop();
+            gameLoop.stop();
+        }
     }
     //key prssed-> for all keys
     //if the key pressed is the space bar key its gonna do a velocity check and go up (cuz v is -9 here)
@@ -187,6 +245,18 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
         if (e.getKeyCode() == KeyEvent.VK_SPACE)
         {
             velocityY = -9;
+
+            if (gameOver)
+            {
+                //restart the game by resetting the conditions
+                bird.y = birdY;
+                velocityY = 0;
+                pipes.clear();
+                score = 0;
+                gameOver = false;
+                gameLoop.start();
+                placePipesTimer.start();
+            }
         }
     }
 
