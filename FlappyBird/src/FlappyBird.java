@@ -88,6 +88,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
     boolean gameOver = false;
 
     double score = 0;
+    int highScore = 0;
 
     FlappyBird()
     {
@@ -122,11 +123,12 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
 
     }
 
+    //(0-1) * (pipeHeight/2) -> (0,256)
+    //128
+    //0-128-(0,256) --> pipeHeight/4 -> 3/4 of piprHeight
+
     public void placePipes()
     {
-        //(0-1) * (pipeHeight/2) -> (0,256)
-        //128
-        //0-128-(0,256) --> pipeHeight/4 -> 3/4 of piprHeight
         int randomPipeY = (int) (pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2));
         int openingSpace = boardHeight/4;
         
@@ -176,6 +178,10 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
             g.drawString(String.valueOf((int) score), 10, 35);
         }
 
+        //High score
+        // High Score
+        g.setFont(new Font("Arial", Font.PLAIN, 32));
+        g.drawString("High Score: " + highScore, 10, 70);
     }
     
     // we've now created a window and the bg img 
@@ -201,10 +207,14 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
             Pipe pipe = pipes.get(i);
             pipe.x += velocitx; // every frame pipes will move -4 to the left
 
-            if (!pipe.passed && bird.x > pipe.x + pipe.width)
+            if (!pipe.passed && bird.x > pipe.x + pipe.width)  
             {
                 pipe.passed = true;
                 score += 0.5;
+
+                if ((int) score > highScore) {
+                    highScore = (int) score;
+                }
             }
 
             if (collision(bird, pipe))
@@ -234,6 +244,9 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener{
 
         if (gameOver)
         {
+            if ((int) score > highScore) {
+                highScore = (int) score; // Update the high score
+            }
             placePipesTimer.stop();
             gameLoop.stop();
         }
